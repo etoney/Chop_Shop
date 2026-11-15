@@ -1,0 +1,116 @@
+===============================================================================
+  CHOP SHOP  //  CONTROLS QUICK REFERENCE
+  Castle Danger Music Company
+===============================================================================
+
+Chop Shop is a clipper: anything louder than the CEILING gets chopped off, so
+you can make a track, bus or whole mix louder without the peaks going over.
+
+Tip: double-click a knob to reset it. Double-click the value under a knob to
+type an exact number (e.g. "-0.3" for the ceiling).
+
+
+-------------------------------------------------------------------------------
+MODE (pick one)
+-------------------------------------------------------------------------------
+  MASTER        Transparent clipping for the mix bus / master. Below the
+                ceiling the signal passes untouched (no colour at all); only
+                the peaks that cross the ceiling are shaved off.
+
+  AGGRESSIVE    For drums, drum buses, bass, guitars and other tracks. Adds
+                grit before the clip and clips earlier and harder, so
+                transients crack and the sound gets denser and crunchier.
+
+  COLOR         Transparent clipping plus the COLOR dial (below), which adds
+                harmonic saturation. At COLOR 0 it's exactly the same as
+                MASTER; turn it up for warmth, then grit.
+
+
+-------------------------------------------------------------------------------
+CLIP SHAPE (works in every mode)
+-------------------------------------------------------------------------------
+  HARD          Brickwall: the waveform is cut flat at the ceiling. Cleanest
+                below the ceiling, the most "edge" when you push it.
+  SOFT          Rounded knee: the waveform bends into the ceiling instead of
+                being cut flat. Smoother and warmer, a little less loud.
+
+
+-------------------------------------------------------------------------------
+OVERSAMPLING
+-------------------------------------------------------------------------------
+  OFF / 2x / 4x / 8x
+                Clipping creates high harmonics that can fold back down as
+                harsh "aliasing". Oversampling stops that. 4x is a good
+                default; use 8x on the master for the cleanest result, OFF or
+                2x on lots of tracks to save CPU. Higher settings add a tiny
+                bit of latency, which Chop Shop reports to your DAW (Studio
+                Pro compensates for it automatically).
+
+
+-------------------------------------------------------------------------------
+THE CURVE
+-------------------------------------------------------------------------------
+  Shows what the current MODE / SHAPE / COLOR does to the signal: input
+  across, output up. The dashed red lines are the ceiling. The dot shows how
+  hard the signal is hitting right now; it turns yellow while it's being
+  chopped.
+
+
+-------------------------------------------------------------------------------
+CONTROLS
+-------------------------------------------------------------------------------
+  INPUT         -12 to +24 dB. How hard you push into the clipper. This is
+                the main knob: more INPUT = louder and more clipping.
+  CEILING       -24 to 0 dBFS. The level nothing can go past. For a master,
+                -0.3 to -1 dB is typical.
+  COLOR         0-100%. Harmonic saturation (COLOR mode only; it's greyed out
+                in the other modes). 0 = transparent, 100 = full colour.
+  MIX           0-100%. Blends the clipped signal with the dry signal
+                (parallel clipping). 100% = only the clipped signal.
+                Note: below 100% the dry peaks come back, so the ceiling is
+                no longer guaranteed.
+  OUTPUT        -24 to +12 dB. Final level trim.
+
+
+-------------------------------------------------------------------------------
+METERS
+-------------------------------------------------------------------------------
+  IN            Input peak level.
+  CHOP          How many dB are being chopped off the peaks right now. The
+                white line holds the highest recent value. A few dB on a
+                drum bus is normal; on a master, 1-3 dB is usually safe.
+  OUT           Output peak level.
+
+
+-------------------------------------------------------------------------------
+SWITCHES
+-------------------------------------------------------------------------------
+  GAIN MATCH    Turns the output down by exactly as much as INPUT turns it
+                up. Use it to compare fairly: you hear what the clipping does
+                to the sound instead of just "louder sounds better".
+  SCRAPS        Listen to ONLY what the clipper is chopping off. Great for
+                setting INPUT: if you can hear the music in the scraps (not
+                just clicks and fizz), you're clipping too hard. Remember to
+                turn it off before you bounce! A yellow "LISTENING TO SCRAPS"
+                banner shows while it's on.
+
+
+-------------------------------------------------------------------------------
+PRESETS
+-------------------------------------------------------------------------------
+  The preset menu, < and > step through presets, SAVE stores your own,
+  DELETE removes the selected user preset. User presets are files shared by
+  every project and DAW:
+      Mac:     ~/Library/Application Support/Castle Danger/Chop Shop/Presets
+      Windows: %APPDATA%\Castle Danger\Chop Shop\Presets
+
+  Factory presets:
+      Init (Transparent)    Master: Clean Loud    Master: Peak Shaver
+      Master: Brickwall     Drum Bus Smash        Snare Crack
+      Kick Chop             Parallel Crunch       Guitar Grind
+      Warm Glue             Vocal Edge            808 Grit
+      Rust Bucket
+
+===============================================================================
+  castledangermusic.com  //  We make music
+===============================================================================
