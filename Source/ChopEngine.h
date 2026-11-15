@@ -2,9 +2,9 @@
 // CHOP SHOP clipper engine.
 //   Modes:  MASTER     - transparent clipper (pure hard clip / gentle soft knee)
 //           AGGRESSIVE - crunchy, dense clipping for drums and tracks
-//           COLOR      - transparent clipper with a COLOR dial that adds harmonic
-//                        saturation (0 = transparent, 100 = full colour)
-//   Shape:  HARD or SOFT, available in every mode.
+//   Shape:  HARD or SOFT, available in both modes.
+//   Color:  a dial that adds harmonic saturation in either mode
+//           (0 = no colour at all, 100 = full colour).
 //   Extras: oversampling (off/2x/4x/8x), MIX (parallel clipping), GAIN MATCH,
 //           SCRAPS (listen to only what the clipper chops off), and a final
 //           safety clamp so the output never goes past the CEILING.
@@ -14,7 +14,7 @@
 
 namespace chop
 {
-enum Mode  { master = 0, aggressive = 1, color = 2 };
+enum Mode  { master = 0, aggressive = 1 };
 enum Shape { hard = 0, soft = 1 };
 
 // Gentle soft knee: linear up to `knee`, then bends smoothly into 1.0 (slope stays continuous).
@@ -26,7 +26,7 @@ inline float softKnee (float u, float knee)
     return std::copysign (knee + r * std::tanh ((a - knee) / r), u);
 }
 
-// Harmonic saturator used by the COLOR dial. Unity gain for quiet signals, rounds off
+// Harmonic saturator used by the COLOR dial (runs before the clipper in both modes). Unity gain for quiet signals, rounds off
 // peaks, slight asymmetry for even (2nd) harmonics. c = 0 is exactly a straight wire.
 inline float colorSat (float u, float c)
 {
@@ -44,23 +44,16 @@ inline float colorSat (float u, float c)
 // Used by the audio path and by the curve display in the editor.
 inline float shapeSample (float u, int mode, int shape, float colorAmt)
 {
-    switch (mode)
+    const float c = colorSat (u, colorAmt);   // COLOR first, in either mode
+    if (mode == aggressive)
     {
-        case aggressive:
-        {
-            // pre-drive grit: odd + a little even harmonics, then clip harder/earlier
-            const float v = juce::jlimit (-2.0f, 2.0f, u);
-            const float g = v + 0.22f * v * std::abs (v) + 0.07f * v * v;
-            return shape == hard ? juce::jlimit (-1.0f, 1.0f, g) : softKnee (g, 0.45f);
-        }
-        case color:
-        {
-            const float g = colorSat (u, colorAmt);
-            return shape == hard ? juce::jlimit (-1.0f, 1.0f, g) : softKnee (g, 0.8f);
-        }
-        default: // master: transparent
-            return shape == hard ? juce::jlimit (-1.0f, 1.0f, u) : softKnee (u, 0.85f);
+        // pre-drive grit: odd + a little even harmonics, then clip harder/earlier
+        const float v = juce::jlimit (-2.0f, 2.0f, c);
+        const float g = v + 0.22f * v * std::abs (v) + 0.07f * v * v;
+        return shape == hard ? juce::jlimit (-1.0f, 1.0f, g) : softKnee (g, 0.45f);
     }
+    // master: transparent
+    return shape == hard ? juce::jlimit (-1.0f, 1.0f, c) : softKnee (c, 0.85f);
 }
 
 struct Params
@@ -110,7 +103,7 @@ public:
         const float gm = p.gainMatch ? juce::Decibels::decibelsToGain (-p.inputDb) : 1.0f;
         inGain.setTargetValue (juce::Decibels::decibelsToGain (p.inputDb));
         ceil.setTargetValue (juce::Decibels::decibelsToGain (p.ceilingDb));
-        colorAmt.setTargetValue (p.mode == color ? p.color : 0.0f);
+        colorAmt.setTargetValue (p.color);
         mixAmt.setTargetValue (p.mix);
         outGain.setTargetValue (juce::Decibels::decibelsToGain (p.outputDb) * gm);
         if (snap) for (auto* s : { &inGain, &ceil, &colorAmt, &mixAmt, &outGain }) s->setCurrentAndTargetValue (s->getTargetValue());
@@ -200,8 +193,8 @@ private:
             os[(size_t) activeOs]->processSamplesDown (block);
         }
 
-        // 4) DC blocker (non-master modes create a little DC), safety ceiling, mix, output
-        const bool dcOn = mode != master;
+        // 4) DC blocker (AGGRESSIVE and COLOR create a little DC), safety ceiling, mix, output
+        const bool dcOn = mode != master || prm.color > 0.0f;
         float outPk = 0.0f;
         std::array<float, kChunk> gMix, gOut;
         for (int i = 0; i < n; ++i) { gMix[(size_t) i] = mixAmt.getNextValue(); gOut[(size_t) i] = outGain.getNextValue(); }

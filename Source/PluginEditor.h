@@ -113,7 +113,6 @@ private:
     void placeKnob (Knob&, juce::Rectangle<int>);
     void timerCallback() override;
     void buildBackdrop();
-    void updateColorEnabled();
 
     void refreshPresetBox();
     void stepPreset (int delta);

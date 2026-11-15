@@ -490,7 +490,7 @@ void CurveDisplay::paint (juce::Graphics& g)
 
     // the curve
     const auto p = proc.currentParams();
-    const float col = p.mode == chop::color ? p.color : 0.0f;
+    const float col = p.color;
     juce::Path curvePath;
     for (int i = 0; i <= 240; ++i)
     {
@@ -515,11 +515,11 @@ void CurveDisplay::paint (juce::Graphics& g)
     }
 
     // labels
-    static const char* modeNames[] = { "MASTER", "AGGRESSIVE", "COLOR" };
+    static const char* modeNames[] = { "MASTER", "AGGRESSIVE" };
     g.setColour (pal::paint); g.setFont (tex::stencil (15.0f).withExtraKerningFactor (0.08f));
-    juce::String head = juce::String (modeNames[juce::jlimit (0, 2, p.mode)]) + "  /  " + (p.shape == chop::hard ? "HARD" : "SOFT");
-    if (p.mode == chop::color) head << "  /  " << juce::roundToInt (p.color * 100.0f) << "%";
-    g.drawText (head, r.reduced (12, 6).removeFromTop (18), juce::Justification::centredLeft);
+    juce::String head = juce::String (modeNames[juce::jlimit (0, 1, p.mode)]) + "  /  " + (p.shape == chop::hard ? "HARD" : "SOFT");
+    if (p.color > 0.0f) head << "  +  " << juce::roundToInt (p.color * 100.0f) << "% COLOR";
+    g.drawFittedText (head, r.reduced (12, 6).removeFromTop (18).toNearestInt(), juce::Justification::centredLeft, 1, 0.6f);
     g.setColour (pal::paintDim.withAlpha (0.7f)); g.setFont (tex::plainBold (9.0f).withExtraKerningFactor (0.1f));
     g.drawText ("INPUT  >", r.reduced (12, 6).removeFromBottom (12), juce::Justification::centredRight);
     g.drawText ("TRANSFER CURVE", r.reduced (12, 6).removeFromBottom (12), juce::Justification::centredLeft);
@@ -534,7 +534,7 @@ void CurveDisplay::paint (juce::Graphics& g)
 //==============================================================================
 ChopShopEditor::ChopShopEditor (ChopShopProcessor& p)
     : AudioProcessorEditor (&p), proc (p),
-      modeSel (*p.apvts.getParameter ("mode"), { "MASTER", "AGGRESSIVE", "COLOR" }, { "TRANSPARENT", "DRUMS & TRACKS", "HARMONIC SATURATION" }),
+      modeSel (*p.apvts.getParameter ("mode"), { "MASTER", "AGGRESSIVE" }, { "TRANSPARENT", "DRUMS & TRACKS" }),
       shapeSel (*p.apvts.getParameter ("shape"), { "HARD", "SOFT" }, { "BRICKWALL", "ROUNDED KNEE" }),
       osSel (*p.apvts.getParameter ("oversample"), { "OFF", "2x", "4x", "8x" }),
       curve (p)
@@ -549,8 +549,8 @@ ChopShopEditor::ChopShopEditor (ChopShopProcessor& p)
     inputKnob->label.setFont (tex::stencil (20.0f).withExtraKerningFactor (0.12f));
 
     for (auto* s : { &modeSel, &shapeSel, &osSel }) addAndMakeVisible (*s);
-    modeSel.setTooltip ("MASTER: transparent clipping for the mix bus.  AGGRESSIVE: crunchy, dense clipping for drums and tracks.  COLOR: transparent clipping plus the COLOR dial's harmonic saturation.");
-    modeSel.onChange = [this] { updateColorEnabled(); curve.repaint(); };
+    modeSel.setTooltip ("MASTER: transparent clipping for the mix bus.  AGGRESSIVE: crunchy, dense clipping for drums and tracks.  Add COLOR to either one.");
+    modeSel.onChange = [this] { curve.repaint(); };
     shapeSel.onChange = [this] { curve.repaint(); };
 
     gainMatchButton.setName ("gainMatch");
@@ -587,7 +587,7 @@ ChopShopEditor::ChopShopEditor (ChopShopProcessor& p)
     deleteButton.onClick = [this] { confirmDelete(); };
 
     refreshPresetBox();
-    updateColorEnabled();
+    colorKnob->slider.setTooltip ("Adds harmonic saturation in either mode: 0 = none, 100 = full colour.");
     setSize (940, 580);
     startTimerHz (30);
 }
@@ -624,14 +624,6 @@ void ChopShopEditor::placeKnob (Knob& k, juce::Rectangle<int> cell)
     k.slider.setBounds (cell);
 }
 
-void ChopShopEditor::updateColorEnabled()
-{
-    const bool on = modeSel.getIndex() == chop::color;
-    colorKnob->slider.setEnabled (on);
-    colorKnob->label.setColour (juce::Label::textColourId, on ? pal::paint : pal::paintDim.withAlpha (0.4f));
-    colorKnob->slider.setTooltip (on ? "Adds harmonic saturation: 0 = transparent, 100 = full colour."
-                                     : "COLOR works in COLOR mode. Click COLOR above to use it.");
-}
 
 void ChopShopEditor::resized()
 {

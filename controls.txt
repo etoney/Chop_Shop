@@ -14,20 +14,18 @@ type an exact number (e.g. "-0.3" for the ceiling).
 MODE (pick one)
 -------------------------------------------------------------------------------
   MASTER        Transparent clipping for the mix bus / master. Below the
-                ceiling the signal passes untouched (no colour at all); only
-                the peaks that cross the ceiling are shaved off.
+                ceiling the signal passes untouched (as long as COLOR is at
+                0); only the peaks that cross the ceiling are shaved off.
 
   AGGRESSIVE    For drums, drum buses, bass, guitars and other tracks. Adds
                 grit before the clip and clips earlier and harder, so
                 transients crack and the sound gets denser and crunchier.
 
-  COLOR         Transparent clipping plus the COLOR dial (below), which adds
-                harmonic saturation. At COLOR 0 it's exactly the same as
-                MASTER; turn it up for warmth, then grit.
+  Turn up the COLOR knob (below) to add harmonic saturation to either mode.
 
 
 -------------------------------------------------------------------------------
-CLIP SHAPE (works in every mode)
+CLIP SHAPE (works in both modes)
 -------------------------------------------------------------------------------
   HARD          Brickwall: the waveform is cut flat at the ceiling. Cleanest
                 below the ceiling, the most "edge" when you push it.
@@ -50,7 +48,7 @@ OVERSAMPLING
 -------------------------------------------------------------------------------
 THE CURVE
 -------------------------------------------------------------------------------
-  Shows what the current MODE / SHAPE / COLOR does to the signal: input
+  Shows what the current MODE, SHAPE and COLOR do to the signal: input
   across, output up. The dashed red lines are the ceiling. The dot shows how
   hard the signal is hitting right now; it turns yellow while it's being
   chopped.
@@ -63,8 +61,9 @@ CONTROLS
                 the main knob: more INPUT = louder and more clipping.
   CEILING       -24 to 0 dBFS. The level nothing can go past. For a master,
                 -0.3 to -1 dB is typical.
-  COLOR         0-100%. Harmonic saturation (COLOR mode only; it's greyed out
-                in the other modes). 0 = transparent, 100 = full colour.
+  COLOR         0-100%. Adds harmonic saturation before the clipper, in
+                either mode. 0 = no colour at all, 100 = full colour. Low
+                settings add warmth; high settings add grit.
   MIX           0-100%. Blends the clipped signal with the dry signal
                 (parallel clipping). 100% = only the clipped signal.
                 Note: below 100% the dry peaks come back, so the ceiling is
@@ -105,11 +104,11 @@ PRESETS
       Windows: %APPDATA%\Castle Danger\Chop Shop\Presets
 
   Factory presets:
-      Init (Transparent)    Master: Clean Loud    Master: Peak Shaver
-      Master: Brickwall     Drum Bus Smash        Snare Crack
-      Kick Chop             Parallel Crunch       Guitar Grind
-      Warm Glue             Vocal Edge            808 Grit
-      Rust Bucket
+      Init (Transparent)    Master: Clean Loud    Master: Tape Warmth
+      Master: Peak Shaver   Master: Brickwall     Drum Bus Smash
+      Snare Crack           Kick Chop             Parallel Crunch
+      Guitar Grind          Warm Glue             Vocal Edge
+      808 Grit              Rust Bucket
 
 ===============================================================================
   castledangermusic.com  //  We make music

@@ -21,7 +21,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChopShopProcessor::createLay
     auto pctAttr = AudioParameterFloatAttributes().withLabel ("%")
         .withStringFromValueFunction ([] (float v, int) { return String (roundToInt (v)) + "%"; });
 
-    p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "mode", 1 }, "Mode", StringArray { "Master", "Aggressive", "Color" }, 0));
+    p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "mode", 1 }, "Mode", StringArray { "Master", "Aggressive" }, 0));
     p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "shape", 1 }, "Clip Shape", StringArray { "Hard", "Soft" }, 0));
     p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { "inputDb", 1 }, "Input", NormalisableRange<float> (-12.0f, 24.0f, 0.1f), 0.0f, dbAttr));
     p.push_back (std::make_unique<AudioParameterFloat> (ParameterID { "ceilingDb", 1 }, "Ceiling", NormalisableRange<float> (-24.0f, 0.0f, 0.1f, 2.0f), 0.0f, dbAttr));

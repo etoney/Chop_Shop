@@ -78,8 +78,9 @@ int main (int argc, char** argv)
         ChopShopProcessor p;
         p.setPlayConfigDetails (2, 2, 48000.0, 512);
         check (p.getProgramName (p.getCurrentProgram()) == "Init (Transparent)", "opens on Init (Transparent)");
+        check (p.getProgramName (5) == "Drum Bus Smash" && p.getProgramName (12) == "808 Grit", "preset order");
 
-        for (int mode = 0; mode < 3; ++mode)
+        for (int mode = 0; mode < 2; ++mode)
             for (int shape = 0; shape < 2; ++shape)
                 for (int osI : { 0, 2, 3 })
                 {
@@ -103,18 +104,30 @@ int main (int argc, char** argv)
             check (p.getLatencySamples() == p.getEngine().latencyFor (osI), juce::String::formatted ("latency reported for os %d: %d samples", osI, p.getLatencySamples()));
         }
 
-        // COLOR 0 = transparent, more COLOR = more harmonics (below the ceiling, so it's the saturator alone)
+        // COLOR 0 = transparent, more COLOR = more harmonics (MASTER, below the ceiling, so it's the saturator alone)
         float last = -300.0f;
         for (float c : { 0.0f, 25.0f, 50.0f, 75.0f, 100.0f })
         {
             p.setCurrentProgram (0);
-            setP (p, "mode", 2); setP (p, "color", c); setP (p, "shape", 1);
+            setP (p, "mode", 0); setP (p, "color", c); setP (p, "shape", 1);
             const auto y = renderSine (p, 0.5f, 500.0f);
             const float h = harmonicsDb (y, 500.0f, 48000.0);
             std::printf ("   color %3.0f%% @ -6 dBFS: harmonics %.1f dB, peak %.2f dBFS\n", c, h, juce::Decibels::gainToDecibels (peak (y)));
             if (c == 0.0f) check (h < -90.0f, "COLOR 0 is transparent");
             else check (h > last + 1.0f, juce::String::formatted ("COLOR %.0f adds harmonics", c));
             last = h;
+        }
+
+        // COLOR works in AGGRESSIVE too
+        {
+            auto hA = [&] (float c)
+            {
+                p.setCurrentProgram (0);
+                setP (p, "mode", 1); setP (p, "color", c); setP (p, "shape", 1);
+                return harmonicsDb (renderSine (p, 0.3f, 500.0f), 500.0f, 48000.0);
+            };
+            const float h0 = hA (0.0f), h1 = hA (100.0f);
+            check (h1 > h0 + 3.0f, juce::String::formatted ("COLOR adds harmonics in AGGRESSIVE: %.1f -> %.1f dB", h0, h1));
         }
 
         // AGGRESSIVE is grittier than MASTER at the same drive
@@ -191,14 +204,14 @@ int main (int argc, char** argv)
     {
         ChopShopProcessor p;
         p.setPlayConfigDetails (2, 2, 48000.0, 512);
-        p.setCurrentProgram (4); // Drum Bus Smash
+        p.setCurrentProgram (5); // Drum Bus Smash
         renderSine (p, 0.9f, 80.0f, 48000.0, 30);
         std::unique_ptr<juce::AudioProcessorEditor> ed (p.createEditor());
         // let the meters / saw / curve catch the signal
         for (int i = 0; i < 4; ++i) { renderSine (p, 0.9f, 80.0f, 48000.0, 26); juce::MessageManager::getInstance()->runDispatchLoopUntil (40); }
         check (writePng (ed->createComponentSnapshot (ed->getLocalBounds(), true, 2.0f), dir.getChildFile ("gui.png")), "main snapshot");
 
-        p.setCurrentProgram (11); // 808 Grit (COLOR)
+        p.setCurrentProgram (12); // 808 Grit (AGGRESSIVE + COLOR)
         for (int i = 0; i < 3; ++i) { renderSine (p, 0.6f, 60.0f, 48000.0, 26); juce::MessageManager::getInstance()->runDispatchLoopUntil (40); }
         check (writePng (ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f), dir.getChildFile ("gui_color.png")), "color snapshot");
 
