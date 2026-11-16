@@ -142,7 +142,8 @@ private:
     static constexpr int kUserIdBase = 1001;
 
     std::vector<Plate> plates;
-    juce::Rectangle<int> logoArea, badgeArea, crestArea, meterArea, presetArea, stripeArea;
+    juce::Rectangle<int> logoArea, badgeArea, crestArea, meterArea, presetArea, stripeArea, linkArea;
+    int linkTick = 0;
     juce::Image backdrop, logoImage;
     float inMeter = 0, outMeter = 0, chopMeter = 0, chopHold = 0, flicker = 0;
     int holdTimer = 0;

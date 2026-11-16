@@ -1,5 +1,6 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "CDLink.h"
 #include "ChopEngine.h"
 #include "Presets.h"
 
@@ -39,6 +40,11 @@ public:
     // metering, read and reset by the editor
     chop::Engine& getEngine() { return engine; }
 
+    // Castle Danger Link: The Master can read and set Chop Shop's controls
+    using Link = cdlink::PluginLink<juce::AudioProcessorValueTreeState>;
+    Link& getLink() { return *link; }
+    std::atomic<float> inPeakHold { 0.0f };   // input sample peak, reported over the link
+
     // ---- user presets (files shared by every project and DAW)
     static juce::File getUserPresetFolder();
     static juce::Array<juce::File> getUserPresets();
@@ -49,6 +55,7 @@ public:
     std::atomic<int> presetVersion { 0 };
 
 private:
+    std::unique_ptr<Link> link;
     void resetToDefaults();
     chop::Engine engine;
     int currentProgram = 0, reportedLatency = -1;

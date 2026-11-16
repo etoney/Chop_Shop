@@ -200,6 +200,33 @@ int main (int argc, char** argv)
         }
     }
 
+
+    // ---------------- Castle Danger Link: The Master (in "another plugin binary") sets controls over the socket
+    {
+        ChopShopProcessor d;
+        auto otherBinary = cdlink::Node::createIsolatedForTesting();
+        juce::var lastStatus, lastApplied;
+        cdlink::Endpoint master ("master", [&] (const juce::var& m)
+        {
+            const auto t = m.getProperty ("type", "").toString();
+            if (t == "status" && m.getProperty ("from", "").toString() == d.getLink().getId()) lastStatus = m;
+            if (t == "applied") lastApplied = m;
+        }, otherBinary);
+        auto pump = [] (int ms) { juce::MessageManager::getInstance()->runDispatchLoopUntil (ms); };
+        for (int i = 0; i < 30 && ! master.isOnline(); ++i) pump (50);
+        pump (1600);
+        check (lastStatus.isObject() && lastStatus.getProperty ("params", {}).hasProperty ("ceilingDb") && lastStatus.getProperty ("extra", {}).hasProperty ("inPeakDb"),
+               "Chop Shop reports its controls and input peak over the link");
+        auto set = cdlink::Endpoint::makeMessage ("set");
+        auto* prm = new juce::DynamicObject();
+        prm->setProperty ("mode", 0.0); prm->setProperty ("shape", 1.0); prm->setProperty ("ceilingDb", -4.5);
+        set->setProperty ("params", juce::var (prm));
+        master.send (set, d.getLink().getId());
+        for (int i = 0; i < 40 && ! lastApplied.isObject(); ++i) pump (50);
+        check (std::abs (d.apvts.getRawParameterValue ("ceilingDb")->load() + 4.5f) < 0.05f && d.apvts.getRawParameterValue ("shape")->load() > 0.5f && lastApplied.isObject(),
+               "The Master can set Chop Shop's controls (and gets a confirmation)");
+    }
+
     // ---------------- GUI
     {
         ChopShopProcessor p;

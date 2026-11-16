@@ -10,6 +10,16 @@ ChopShopProcessor::ChopShopProcessor()
                                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
       apvts (*this, nullptr, "ChopShop", createLayout())
 {
+    link = std::make_unique<Link> ("chopshop", "Chop Shop", JucePlugin_VersionString, apvts,
+        juce::StringArray { "mode", "shape", "inputDb", "ceilingDb", "color", "mix", "outputDb", "oversample", "gainMatch", "scraps" });
+    link->onSetByMaster = [this] (const juce::StringArray&) { currentPresetName = "Set by The Master"; ++presetVersion; };
+    link->extraStatus = [this]
+    {
+        auto* o = new juce::DynamicObject();
+        const float pk = inPeakHold.exchange (0.0f);
+        o->setProperty ("inPeakDb", pk > 1e-6f ? 20.0 * std::log10 ((double) pk) : -100.0);
+        return juce::var (o);
+    };
 }
 
 juce::AudioProcessorValueTreeState::ParameterLayout ChopShopProcessor::createLayout()
@@ -76,8 +86,15 @@ void ChopShopProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mi
     const int outCh = juce::jmin (2, buffer.getNumChannels());
     if (inCh == 1 && outCh > 1) buffer.copyFrom (1, 0, buffer, 0, 0, n); // mono in -> stereo out
 
+    double inPow = 0;
+    float pk = 0;
+    for (int c = 0; c < outCh; ++c) { auto* d = buffer.getReadPointer (c); for (int i = 0; i < n; ++i) { inPow += (double) d[i] * d[i]; pk = std::max (pk, std::abs (d[i])); } }
+    inPeakHold.store (std::max (inPeakHold.load(), pk));
     engine.setParams (currentParams());
     engine.process (buffer.getArrayOfWritePointers(), outCh, n);
+    double outPow = 0;
+    for (int c = 0; c < outCh; ++c) { auto* d = buffer.getReadPointer (c); for (int i = 0; i < n; ++i) outPow += (double) d[i] * d[i]; }
+    link->env.addPowers (inPow / juce::jmax (1, outCh * n), outPow / juce::jmax (1, outCh * n), n);
     if (engine.getLatency() != reportedLatency)
     {
         reportedLatency = engine.getLatency();

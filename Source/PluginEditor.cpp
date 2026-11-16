@@ -639,6 +639,7 @@ void ChopShopEditor::resized()
     saveButton.setBounds (790, 70, 62, 24);
     deleteButton.setBounds (858, 70, 64, 24);
     stripeArea = { 0, 110, getWidth(), 10 };
+    linkArea = { 326, 80, 132, 14 };
 
     plates.push_back ({ "MODE", { 16, 130, 448, 86 }, true });
     modeSel.setBounds (26, 154, 428, 54);
@@ -868,6 +869,19 @@ void ChopShopEditor::paint (juce::Graphics& g)
         g.setOpacity (alpha); g.drawImage (logoImage, la);
         g.setOpacity (1.0f);
     }
+
+    // Castle Danger Link status
+    {
+        auto& lk = proc.getLink();
+        const bool linked = lk.masterNearby();
+        const bool justSet = lk.getLastNoteTime() > 0 && juce::Time::getMillisecondCounter() - lk.getLastNoteTime() < 6000;
+        auto r = linkArea.toFloat();
+        const auto col = justSet ? pal::signalHot : (linked ? pal::hazard : pal::paintDim.withAlpha (0.35f));
+        if (linked) { juce::Path lp; lp.addEllipse (r.getX(), r.getCentreY() - 3.5f, 7, 7); juce::DropShadow (col.withAlpha (0.8f), 6, {}).drawForPath (g, lp); }
+        g.setColour (col); g.fillEllipse (r.getX(), r.getCentreY() - 3.5f, 7, 7);
+        g.setFont (tex::plainBold (9.5f).withExtraKerningFactor (0.1f));
+        g.drawText (justSet ? "SET BY THE MASTER" : (linked ? "LINKED TO THE MASTER" : "LINK"), r.withTrimmedLeft (11).toNearestInt(), juce::Justification::centredLeft);
+    }
 }
 
 void MeterPanel::paint (juce::Graphics& g)
@@ -963,6 +977,7 @@ void MeterPanel::paint (juce::Graphics& g)
 
 void ChopShopEditor::timerCallback()
 {
+    if (++linkTick >= 15) { linkTick = 0; repaint (linkArea.expanded (8)); }
     auto& e = proc.getEngine();
     const float in = e.inPeak.exchange (0.0f), out = e.outPeak.exchange (0.0f);
     const float ch = e.chopDb.exchange (0.0f), drive = e.drivePeak.exchange (0.0f);
