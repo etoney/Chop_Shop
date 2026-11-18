@@ -1,6 +1,6 @@
 # Chop Shop
 
-A hard & soft clipper plugin (VST3 / AU / Standalone) by **Castle Danger Music Company**.
+A hard & soft clipper plugin (VST3 / AU) by **Castle Danger Music Company**.
 
 - **Modes:** MASTER (transparent) and AGGRESSIVE (drums & tracks)
 - **Color:** a dial that adds harmonic saturation to either mode (0 = none, 100 = full)
@@ -11,7 +11,7 @@ See `controls.txt` for every control and `readme.txt` for installing.
 
 ## Building
 
-Pushing to `main` runs GitHub Actions, which builds macOS (VST3 + AU + Standalone, universal) and Windows (VST3 + Standalone), then:
+Pushing to `main` runs GitHub Actions, which builds macOS (VST3 + AU, universal) and Windows (VST3), then:
 
 - uploads the builds as workflow artifacts, and
 - pushes the release zips to the `downloads-macos` / `downloads-windows` branches.
