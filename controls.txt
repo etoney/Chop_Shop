@@ -132,5 +132,12 @@ CASTLE DANGER LINK (works with The Master)
   show here, you can undo them in your DAW, and you can change anything
   afterwards.
 
+  ON A DRUM TRACK: The Master (1.12 or later) can also ask for Chop Shop on a
+  kick, snare or drum track whose hits make the mix's peaks. Put it after The
+  Servant on that track. The Master sets MASTER mode, a HARD knee (SOFT on a
+  full kit), 2x oversampling and a ceiling a few dB under that track's
+  loudest hit, so only the spikes are shaved, and turns that track's Servant
+  compressor off so the two don't double up.
+
   Some DAWs ask the first time a plugin opens a local connection. Allow it;
   the link only talks to 127.0.0.1 (this computer).

@@ -18,7 +18,17 @@ ChopShopProcessor::ChopShopProcessor()
         auto* o = new juce::DynamicObject();
         const float pk = inPeakHold.exchange (0.0f);
         o->setProperty ("inPeakDb", pk > 1e-6f ? 20.0 * std::log10 ((double) pk) : -100.0);
+        // for The Master: which track this copy is on (on a drum track it plans a track clip), and the
+        // loudest input peak since The Master's RESET (the track ceiling goes a few dB under it)
+        o->setProperty ("track", getTrackName());
+        const float sp = songPeak.load();
+        o->setProperty ("songPeakDb", sp > 1e-6f ? 20.0 * std::log10 ((double) sp) : -100.0);
+        o->setProperty ("seconds", (double) songSamples.load() / std::max (1.0, getSampleRate()));
         return juce::var (o);
+    };
+    link->onOtherMessage = [this] (const juce::var& m)
+    {
+        if (m.getProperty ("type", "").toString() == "measure-reset") { songPeak.store (0.0f); songSamples.store (0); }
     };
 }
 
@@ -90,6 +100,8 @@ void ChopShopProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mi
     float pk = 0;
     for (int c = 0; c < outCh; ++c) { auto* d = buffer.getReadPointer (c); for (int i = 0; i < n; ++i) { inPow += (double) d[i] * d[i]; pk = std::max (pk, std::abs (d[i])); } }
     inPeakHold.store (std::max (inPeakHold.load(), pk));
+    songPeak.store (std::max (songPeak.load(), pk));
+    if (pk > 1.0e-4f) songSamples.fetch_add (n);   // only count time with signal
     engine.setParams (currentParams());
     engine.process (buffer.getArrayOfWritePointers(), outCh, n);
     double outPow = 0;

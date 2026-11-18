@@ -44,6 +44,12 @@ public:
     using Link = cdlink::PluginLink<juce::AudioProcessorValueTreeState>;
     Link& getLink() { return *link; }
     std::atomic<float> inPeakHold { 0.0f };   // input sample peak, reported over the link
+    std::atomic<float> songPeak { 0.0f };     // loudest input peak since The Master's RESET
+    std::atomic<juce::int64> songSamples { 0 };
+    juce::CriticalSection nameLock;
+    juce::String trackName;
+    juce::String getTrackName() const { const juce::ScopedLock sl (nameLock); return trackName; }
+    void updateTrackProperties (const TrackProperties& props) override { const juce::ScopedLock sl (nameLock); trackName = props.name.value_or (juce::String()); }
 
     // ---- user presets (files shared by every project and DAW)
     static juce::File getUserPresetFolder();
