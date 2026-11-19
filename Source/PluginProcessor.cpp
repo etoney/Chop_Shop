@@ -1,4 +1,5 @@
 #include "PluginProcessor.h"
+#include "Rebel.h"
 #include "PluginEditor.h"
 
 #ifndef JucePlugin_VersionString
@@ -51,6 +52,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChopShopProcessor::createLay
     p.push_back (std::make_unique<AudioParameterChoice> (ParameterID { "oversample", 1 }, "Oversampling", StringArray { "Off", "2x", "4x", "8x" }, 2));
     p.push_back (std::make_unique<AudioParameterBool> (ParameterID { "gainMatch", 1 }, "Gain Match", false));
     p.push_back (std::make_unique<AudioParameterBool> (ParameterID { "scraps", 1 }, "Scraps (Delta)", false));
+    p.push_back (cdrebel::makeParam());
     return { p.begin(), p.end() };
 }
 
@@ -127,7 +129,7 @@ void ChopShopProcessor::resetToDefaults()
 {
     for (auto* p : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
-            rp->setValueNotifyingHost (rp->getDefaultValue());
+            if (rp->getParameterID() != "rebel") rp->setValueNotifyingHost (rp->getDefaultValue());   // a preset never changes REBEL
 }
 
 void ChopShopProcessor::setCurrentProgram (int index)
