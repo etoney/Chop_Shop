@@ -6,12 +6,12 @@
  #define JucePlugin_VersionString "dev"
 #endif
 
-ChopShopProcessor::ChopShopProcessor()
+CutthroatProcessor::CutthroatProcessor()
     : AudioProcessor (BusesProperties().withInput ("Input", juce::AudioChannelSet::stereo(), true)
                                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)),
-      apvts (*this, nullptr, "ChopShop", createLayout())
+      apvts (*this, nullptr, "Cutthroat", createLayout())
 {
-    link = std::make_unique<Link> ("chopshop", "Chop Shop", JucePlugin_VersionString, apvts,
+    link = std::make_unique<Link> ("chopshop", "Cutthroat", JucePlugin_VersionString, apvts,
         juce::StringArray { "mode", "shape", "inputDb", "ceilingDb", "color", "mix", "outputDb", "oversample", "gainMatch", "scraps" });
     link->onSetByMaster = [this] (const juce::StringArray&) { currentPresetName = "Set by The Master"; ++presetVersion; };
     link->extraStatus = [this]
@@ -33,7 +33,7 @@ ChopShopProcessor::ChopShopProcessor()
     };
 }
 
-juce::AudioProcessorValueTreeState::ParameterLayout ChopShopProcessor::createLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout CutthroatProcessor::createLayout()
 {
     using namespace juce;
     std::vector<std::unique_ptr<RangedAudioParameter>> p;
@@ -56,7 +56,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout ChopShopProcessor::createLay
     return { p.begin(), p.end() };
 }
 
-chop::Params ChopShopProcessor::currentParams() const
+chop::Params CutthroatProcessor::currentParams() const
 {
     auto v = [this] (const char* id) { return apvts.getRawParameterValue (id)->load(); };
     chop::Params p;
@@ -73,7 +73,7 @@ chop::Params ChopShopProcessor::currentParams() const
     return p;
 }
 
-bool ChopShopProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool CutthroatProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     const auto out = layouts.getMainOutputChannelSet();
     if (out != juce::AudioChannelSet::mono() && out != juce::AudioChannelSet::stereo()) return false;
@@ -81,7 +81,7 @@ bool ChopShopProcessor::isBusesLayoutSupported (const BusesLayout& layouts) cons
     return in == out || (in == juce::AudioChannelSet::mono() && out == juce::AudioChannelSet::stereo());
 }
 
-void ChopShopProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void CutthroatProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     engine.prepare (sampleRate, samplesPerBlock);
     const auto p = currentParams();
@@ -90,7 +90,7 @@ void ChopShopProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     setLatencySamples (reportedLatency);
 }
 
-void ChopShopProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
+void CutthroatProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer&)
 {
     juce::ScopedNoDenormals noDenormals;
     const int n = buffer.getNumSamples();
@@ -118,21 +118,21 @@ void ChopShopProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mi
 }
 
 //==============================================================================
-int ChopShopProcessor::getNumPrograms() { return (int) chop::factoryPresets().size(); }
+int CutthroatProcessor::getNumPrograms() { return (int) chop::factoryPresets().size(); }
 
-const juce::String ChopShopProcessor::getProgramName (int index)
+const juce::String CutthroatProcessor::getProgramName (int index)
 {
     return juce::isPositiveAndBelow (index, getNumPrograms()) ? chop::factoryPresets()[(size_t) index].name : "";
 }
 
-void ChopShopProcessor::resetToDefaults()
+void CutthroatProcessor::resetToDefaults()
 {
     for (auto* p : getParameters())
         if (auto* rp = dynamic_cast<juce::RangedAudioParameter*> (p))
             if (rp->getParameterID() != "rebel") rp->setValueNotifyingHost (rp->getDefaultValue());   // a preset never changes REBEL
 }
 
-void ChopShopProcessor::setCurrentProgram (int index)
+void CutthroatProcessor::setCurrentProgram (int index)
 {
     if (! juce::isPositiveAndBelow (index, getNumPrograms())) return;
     currentProgram = index;
@@ -144,36 +144,36 @@ void ChopShopProcessor::setCurrentProgram (int index)
     ++presetVersion;
 }
 
-juce::File ChopShopProcessor::getUserPresetFolder()
+juce::File CutthroatProcessor::getUserPresetFolder()
 {
     auto base = juce::File::getSpecialLocation (juce::File::userApplicationDataDirectory); // ~/Library on macOS, %APPDATA% on Windows
    #if JUCE_MAC
     base = base.getChildFile ("Application Support");
    #endif
-    return base.getChildFile ("Castle Danger").getChildFile ("Chop Shop").getChildFile ("Presets");
+    return base.getChildFile ("Castle Danger").getChildFile ("Cutthroat").getChildFile ("Presets");
 }
 
-juce::Array<juce::File> ChopShopProcessor::getUserPresets()
+juce::Array<juce::File> CutthroatProcessor::getUserPresets()
 {
-    auto files = getUserPresetFolder().findChildFiles (juce::File::findFiles, false, "*.chopshop");
+    auto files = getUserPresetFolder().findChildFiles (juce::File::findFiles, false, "*.cutthroat");
     std::sort (files.begin(), files.end(), [] (const juce::File& a, const juce::File& b)
                { return a.getFileNameWithoutExtension().compareNatural (b.getFileNameWithoutExtension()) < 0; });
     return files;
 }
 
-juce::File ChopShopProcessor::fileForPresetName (const juce::String& name)
+juce::File CutthroatProcessor::fileForPresetName (const juce::String& name)
 {
-    return getUserPresetFolder().getChildFile (juce::File::createLegalFileName (name.trim()) + ".chopshop");
+    return getUserPresetFolder().getChildFile (juce::File::createLegalFileName (name.trim()) + ".cutthroat");
 }
 
-bool ChopShopProcessor::saveUserPreset (const juce::String& rawName)
+bool CutthroatProcessor::saveUserPreset (const juce::String& rawName)
 {
     const auto name = rawName.trim();
     if (name.isEmpty()) return false;
     const auto file = fileForPresetName (name);
     if (! file.getParentDirectory().createDirectory()) return false;
 
-    juce::XmlElement xml ("ChopShopPreset");
+    juce::XmlElement xml ("CutthroatPreset");
     xml.setAttribute ("name", name);
     xml.setAttribute ("pluginVersion", JucePlugin_VersionString);
     for (auto* p : getParameters())
@@ -190,10 +190,10 @@ bool ChopShopProcessor::saveUserPreset (const juce::String& rawName)
     return true;
 }
 
-bool ChopShopProcessor::loadUserPreset (const juce::File& file)
+bool CutthroatProcessor::loadUserPreset (const juce::File& file)
 {
     auto xml = juce::XmlDocument::parse (file);
-    if (xml == nullptr || ! xml->hasTagName ("ChopShopPreset")) return false;
+    if (xml == nullptr || ! xml->hasTagName ("CutthroatPreset")) return false;
     resetToDefaults(); // so parameters added in later versions behave sensibly
     for (auto* e : xml->getChildWithTagNameIterator ("PARAM"))
         if (auto* rp = apvts.getParameter (e->getStringAttribute ("id")))
@@ -203,7 +203,7 @@ bool ChopShopProcessor::loadUserPreset (const juce::File& file)
     return true;
 }
 
-void ChopShopProcessor::getStateInformation (juce::MemoryBlock& destData)
+void CutthroatProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("program", currentProgram, nullptr);
@@ -211,7 +211,7 @@ void ChopShopProcessor::getStateInformation (juce::MemoryBlock& destData)
     if (auto xml = state.createXml()) copyXmlToBinary (*xml, destData);
 }
 
-void ChopShopProcessor::setStateInformation (const void* data, int sizeInBytes)
+void CutthroatProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     if (auto xml = getXmlFromBinary (data, sizeInBytes))
         if (xml->hasTagName (apvts.state.getType()))
@@ -224,6 +224,6 @@ void ChopShopProcessor::setStateInformation (const void* data, int sizeInBytes)
         }
 }
 
-juce::AudioProcessorEditor* ChopShopProcessor::createEditor() { return new ChopShopEditor (*this); }
+juce::AudioProcessorEditor* CutthroatProcessor::createEditor() { return new CutthroatEditor (*this); }
 
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new ChopShopProcessor(); }
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter() { return new CutthroatProcessor(); }

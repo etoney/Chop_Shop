@@ -1,4 +1,4 @@
-name: Build Chop Shop
+name: Build Cutthroat
 
 on:
   push:
@@ -19,11 +19,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libfreetype6-dev libfontconfig1-dev libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxcomposite-dev libxrender-dev libxext-dev
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCHOPSHOP_TESTS_ONLY=ON
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCUTTHROAT_TESTS_ONLY=ON
       - name: Build checks
-        run: cmake --build build --config Release --target ChopShopSnapshot -j4
+        run: cmake --build build --config Release --target CutthroatSnapshot -j4
       - name: Run DSP + preset checks, render GUI
-        run: mkdir -p snapshots && ./build/ChopShopSnapshot_artefacts/Release/ChopShopSnapshot snapshots
+        run: mkdir -p snapshots && ./build/CutthroatSnapshot_artefacts/Release/CutthroatSnapshot snapshots
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -48,10 +48,10 @@ jobs:
             cmake -B build -DCMAKE_BUILD_TYPE=Release
           fi
       - name: Build
-        run: cmake --build build --config Release --target ChopShop_VST3
+        run: cmake --build build --config Release --target Cutthroat_VST3
       - name: Build AU (macOS)
         if: runner.os == 'macOS'
-        run: cmake --build build --config Release --target ChopShop_AU
+        run: cmake --build build --config Release --target Cutthroat_AU
       - name: Check universal + ad-hoc sign (macOS)
         if: runner.os == 'macOS'
         shell: bash
@@ -69,18 +69,18 @@ jobs:
       - name: Package release zip (same layout as the site downloads)
         shell: bash
         run: |
-          VER=$(sed -n 's/^project(CHOPSHOP VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
+          VER=$(sed -n 's/^project(CUTTHROAT VERSION \([0-9.]*\)).*/\1/p' CMakeLists.txt)
           OS=$([ "$RUNNER_OS" = "macOS" ] && echo macOS || echo Windows)
-          ZIP="ChopShop-v${VER}-${OS}.zip"
-          R=build/ChopShop_artefacts/Release
-          mkdir -p pkg/ChopShop/VST3
-          cp readme.txt controls.txt LICENSE.txt THIRD-PARTY-NOTICES.txt pkg/ChopShop/
-          cp -R "$R/VST3/Chop Shop.vst3" pkg/ChopShop/VST3/
+          ZIP="Cutthroat-v${VER}-${OS}.zip"
+          R=build/Cutthroat_artefacts/Release
+          mkdir -p pkg/Cutthroat/VST3
+          cp readme.txt controls.txt LICENSE.txt THIRD-PARTY-NOTICES.txt pkg/Cutthroat/
+          cp -R "$R/VST3/Cutthroat.vst3" pkg/Cutthroat/VST3/
           if [ "$OS" = "macOS" ]; then
-            mkdir -p pkg/ChopShop/AU && cp -R "$R/AU/Chop Shop.component" pkg/ChopShop/AU/
-            (cd pkg && ditto -c -k --sequesterRsrc --keepParent ChopShop "../$ZIP")
+            mkdir -p pkg/Cutthroat/AU && cp -R "$R/AU/Cutthroat.component" pkg/Cutthroat/AU/
+            (cd pkg && ditto -c -k --sequesterRsrc --keepParent Cutthroat "../$ZIP")
           else
-            (cd pkg && 7z a -tzip -mx=9 "../$ZIP" ChopShop > /dev/null)   # 7z writes forward-slash paths
+            (cd pkg && 7z a -tzip -mx=9 "../$ZIP" Cutthroat > /dev/null)   # 7z writes forward-slash paths
           fi
           ls -la "$ZIP"
           BR="downloads-$(echo $OS | tr 'A-Z' 'a-z')"
@@ -89,11 +89,11 @@ jobs:
           git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" "$BR"
       - uses: actions/upload-artifact@v4
         with:
-          name: ChopShop-${{ runner.os }}
+          name: Cutthroat-${{ runner.os }}
           path: |
             readme.txt
             controls.txt
             LICENSE.txt
             THIRD-PARTY-NOTICES.txt
-            build/ChopShop_artefacts/Release/VST3
-            build/ChopShop_artefacts/Release/AU
+            build/Cutthroat_artefacts/Release/VST3
+            build/Cutthroat_artefacts/Release/AU

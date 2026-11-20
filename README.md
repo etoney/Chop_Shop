@@ -1,4 +1,4 @@
-# Chop Shop
+# Cutthroat
 
 A hard & soft clipper plugin (VST3 / AU) by **Castle Danger Music Company**.
 
@@ -22,7 +22,7 @@ Local build:
 
 ```
 cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release --target ChopShop_VST3
+cmake --build build --config Release --target Cutthroat_VST3
 ```
 
-Built with JUCE 8.0.15 (same as DREAD, Possessed and BuzzKill).
+Built with JUCE 8.0.15 (same as Torment, Possessed and Dead Air).

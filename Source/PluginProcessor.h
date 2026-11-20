@@ -4,11 +4,11 @@
 #include "ChopEngine.h"
 #include "Presets.h"
 
-class ChopShopProcessor : public juce::AudioProcessor
+class CutthroatProcessor : public juce::AudioProcessor
 {
 public:
-    ChopShopProcessor();
-    ~ChopShopProcessor() override = default;
+    CutthroatProcessor();
+    ~CutthroatProcessor() override = default;
 
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override {}
@@ -18,7 +18,7 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
 
-    const juce::String getName() const override { return "Chop Shop"; }
+    const juce::String getName() const override { return "Cutthroat"; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     bool isMidiEffect() const override { return false; }
@@ -40,7 +40,7 @@ public:
     // metering, read and reset by the editor
     chop::Engine& getEngine() { return engine; }
 
-    // Castle Danger Link: The Master can read and set Chop Shop's controls
+    // Castle Danger Link: The Master can read and set Cutthroat's controls
     using Link = cdlink::PluginLink<juce::AudioProcessorValueTreeState>;
     Link& getLink() { return *link; }
     std::atomic<float> inPeakHold { 0.0f };   // input sample peak, reported over the link
@@ -67,5 +67,5 @@ private:
     int currentProgram = 0, reportedLatency = -1;
     juce::String currentPresetName { "Init (Transparent)" };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChopShopProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CutthroatProcessor)
 };

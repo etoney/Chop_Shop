@@ -1,5 +1,5 @@
 #pragma once
-// CHOP SHOP clipper engine.
+// CUTTHROAT clipper engine.
 //   Modes:  MASTER     - transparent clipper (pure hard clip / gentle soft knee)
 //           AGGRESSIVE - crunchy, dense clipping for drums and tracks
 //   Shape:  HARD or SOFT, available in both modes.

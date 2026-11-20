@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.22)
 # Must come BEFORE project(), or CMake ignores them: universal (Apple Silicon + Intel), macOS 11+
 set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "")
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "")
-project(CHOPSHOP VERSION 1.3.0)
+project(CUTTHROAT VERSION 1.3.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Same JUCE version as DREAD, Possessed and BuzzKill.
+# Same JUCE version as Torment, Possessed and Dead Air.
 # (Pass -DJUCE_LOCAL_DIR=/path/to/JUCE to build against a local checkout.)
 if(JUCE_LOCAL_DIR)
     add_subdirectory(${JUCE_LOCAL_DIR} JUCE)
@@ -21,13 +21,13 @@ else()
     FetchContent_MakeAvailable(JUCE)
 endif()
 
-if(NOT CHOPSHOP_TESTS_ONLY)
-juce_add_plugin(ChopShop
+if(NOT CUTTHROAT_TESTS_ONLY)
+juce_add_plugin(Cutthroat
     COMPANY_NAME "Castle Danger"
-    PRODUCT_NAME "Chop Shop"
-    BUNDLE_ID com.castledanger.chopshop
+    PRODUCT_NAME "Cutthroat"
+    BUNDLE_ID com.castledanger.cutthroat
     PLUGIN_MANUFACTURER_CODE Cdgr
-    PLUGIN_CODE Chp1
+    PLUGIN_CODE Ctht
     FORMATS VST3 AU
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
@@ -38,17 +38,17 @@ juce_add_plugin(ChopShop
     VST3_CATEGORIES Fx Dynamics Distortion
     AU_MAIN_TYPE kAudioUnitType_Effect)
 
-target_sources(ChopShop PRIVATE
+target_sources(Cutthroat PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp)
 
-target_compile_definitions(ChopShop PUBLIC
+target_compile_definitions(Cutthroat PUBLIC
     JUCE_WEB_BROWSER=0
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0
     JUCE_DISPLAY_SPLASH_SCREEN=0)
 
-target_link_libraries(ChopShop
+target_link_libraries(Cutthroat
     PRIVATE
         juce::juce_audio_utils
         juce::juce_dsp
@@ -59,9 +59,9 @@ target_link_libraries(ChopShop
 endif()
 
 # Headless checks: renders the editor to gui.png and tests the DSP + presets
-juce_add_console_app(ChopShopSnapshot PRODUCT_NAME "ChopShopSnapshot")
-target_sources(ChopShopSnapshot PRIVATE test/snapshot.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
-target_compile_definitions(ChopShopSnapshot PRIVATE
+juce_add_console_app(CutthroatSnapshot PRODUCT_NAME "CutthroatSnapshot")
+target_sources(CutthroatSnapshot PRIVATE test/snapshot.cpp Source/PluginProcessor.cpp Source/PluginEditor.cpp)
+target_compile_definitions(CutthroatSnapshot PRIVATE
     JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_MODAL_LOOPS_PERMITTED=1
     "JucePlugin_VersionString=\"${PROJECT_VERSION}\"")
-target_link_libraries(ChopShopSnapshot PRIVATE juce::juce_audio_processors juce::juce_gui_basics juce::juce_dsp PUBLIC juce::juce_recommended_config_flags)
+target_link_libraries(CutthroatSnapshot PRIVATE juce::juce_audio_processors juce::juce_gui_basics juce::juce_dsp PUBLIC juce::juce_recommended_config_flags)

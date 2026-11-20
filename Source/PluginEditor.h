@@ -37,7 +37,7 @@ private:
     int index = 0, hover = -1;
 };
 
-// The CHOP SHOP saw blade: spins harder the more it chops
+// The CUTTHROAT saw blade: spins harder the more it chops
 class SawBlade : public juce::Component
 {
 public:
@@ -51,11 +51,11 @@ private:
 class CurveDisplay : public juce::Component
 {
 public:
-    explicit CurveDisplay (ChopShopProcessor& p) : proc (p) {}
+    explicit CurveDisplay (CutthroatProcessor& p) : proc (p) {}
     void paint (juce::Graphics&) override;
     void setLevel (float drive) { level = drive; }
 private:
-    ChopShopProcessor& proc;
+    CutthroatProcessor& proc;
     float level = 0.0f;
 };
 
@@ -90,11 +90,11 @@ private:
     juce::Rectangle<int> panel;
 };
 
-class ChopShopEditor : public juce::AudioProcessorEditor, private juce::Timer
+class CutthroatEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
-    explicit ChopShopEditor (ChopShopProcessor&);
-    ~ChopShopEditor() override;
+    explicit CutthroatEditor (CutthroatProcessor&);
+    ~CutthroatEditor() override;
     void paint (juce::Graphics&) override;
     void resized() override;
 
@@ -123,7 +123,7 @@ private:
                      juce::StringArray buttons, std::function<void (int, const juce::String&)> onResult);
     void showMessage (const juce::String& title, const juce::String& text);
 
-    ChopShopProcessor& proc;
+    CutthroatProcessor& proc;
     ChopLookAndFeel lnf;
     std::vector<std::unique_ptr<Knob>> knobs;
     Knob *inputKnob = nullptr, *ceilKnob = nullptr, *colorKnob = nullptr, *mixKnob = nullptr, *outKnob = nullptr;
@@ -149,6 +149,6 @@ private:
     float inMeter = 0, outMeter = 0, chopMeter = 0, chopHold = 0, flicker = 0;
     int holdTimer = 0;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChopShopEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CutthroatEditor)
     cdrebel::Button rebel { proc.apvts };   // REBEL: The Master hands off
 };

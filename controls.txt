@@ -1,9 +1,9 @@
 ===============================================================================
-  CHOP SHOP  //  CONTROLS QUICK REFERENCE
+  CUTTHROAT  //  CONTROLS QUICK REFERENCE
   Castle Danger Music Company
 ===============================================================================
 
-Chop Shop is a clipper: anything louder than the CEILING gets chopped off, so
+Cutthroat is a clipper: anything louder than the CEILING gets chopped off, so
 you can make a track, bus or whole mix louder without the peaks going over.
 
 Tip: double-click a knob to reset it. Double-click the value under a knob to
@@ -41,7 +41,7 @@ OVERSAMPLING
                 harsh "aliasing". Oversampling stops that. 4x is a good
                 default; use 8x on the master for the cleanest result, OFF or
                 2x on lots of tracks to save CPU. Higher settings add a tiny
-                bit of latency, which Chop Shop reports to your DAW (Studio
+                bit of latency, which Cutthroat reports to your DAW (Studio
                 Pro compensates for it automatically).
 
 
@@ -100,8 +100,8 @@ PRESETS
   The preset menu, < and > step through presets, SAVE stores your own,
   DELETE removes the selected user preset. User presets are files shared by
   every project and DAW:
-      Mac:     ~/Library/Application Support/Castle Danger/Chop Shop/Presets
-      Windows: %APPDATA%\Castle Danger\Chop Shop\Presets
+      Mac:     ~/Library/Application Support/Castle Danger/Cutthroat/Presets
+      Windows: %APPDATA%\Castle Danger\Cutthroat\Presets
 
   Factory presets:
       Init (Transparent)    Master: Clean Loud    Master: Tape Warmth
@@ -118,7 +118,7 @@ PRESETS
 -------------------------------------------------------------------------------
 CASTLE DANGER LINK (works with The Master)
 -------------------------------------------------------------------------------
-  Put The Master last on your master bus and Chop Shop links to it by itself
+  Put The Master last on your master bus and Cutthroat links to it by itself
   (nothing to set up, everything stays on your computer). The lamp under the
   logo shows LINK status:
     grey    LINK              no Master in the session
@@ -127,12 +127,12 @@ CASTLE DANGER LINK (works with The Master)
 
   On The Master's FIX IT page, MY PLUGINS mode tells you which Castle Danger
   plugins to put on the master bus and in what order. When you press APPLY
-  there, The Master sets Chop Shop's controls for you and explains what it
+  there, The Master sets Cutthroat's controls for you and explains what it
   changed and why. It's exactly as if you'd turned the knobs: the changes
   show here, you can undo them in your DAW, and you can change anything
   afterwards.
 
-  ON A DRUM TRACK: The Master (1.12 or later) can also ask for Chop Shop on a
+  ON A DRUM TRACK: The Master (1.12 or later) can also ask for Cutthroat on a
   kick, snare or drum track whose hits make the mix's peaks. Put it after The
   Servant on that track. The Master sets MASTER mode, a HARD knee (SOFT on a
   full kit), 2x oversampling and a ceiling a few dB under that track's

@@ -15,14 +15,14 @@ static bool writePng (const juce::Image& img, const juce::File& f)
     return false;
 }
 
-static void setP (ChopShopProcessor& p, const char* id, float v)
+static void setP (CutthroatProcessor& p, const char* id, float v)
 {
     auto* rp = p.apvts.getParameter (id);
     rp->setValueNotifyingHost (rp->convertTo0to1 (v));
 }
 
 // renders a sine through the real processBlock, returns left channel (after the first 0.25 s)
-static std::vector<float> renderSine (ChopShopProcessor& p, float amp, float freq, double sr = 48000.0, int blocks = 60)
+static std::vector<float> renderSine (CutthroatProcessor& p, float amp, float freq, double sr = 48000.0, int blocks = 60)
 {
     p.prepareToPlay (sr, 512);
     juce::AudioBuffer<float> buf (2, 512);
@@ -75,7 +75,7 @@ int main (int argc, char** argv)
 
     // ---------------- DSP
     {
-        ChopShopProcessor p;
+        CutthroatProcessor p;
         p.setPlayConfigDetails (2, 2, 48000.0, 512);
         check (p.getProgramName (p.getCurrentProgram()) == "Init (Transparent)", "opens on Init (Transparent)");
         check (p.getProgramName (5) == "Drum Bus Smash" && p.getProgramName (12) == "808 Grit", "preset order");
@@ -191,7 +191,7 @@ int main (int argc, char** argv)
             p.setCurrentProgram (0);
             setP (p, "mode", 1); setP (p, "inputDb", 7.5f);
             check (p.saveUserPreset ("__test chop"), "save user preset");
-            const auto f = ChopShopProcessor::fileForPresetName ("__test chop");
+            const auto f = CutthroatProcessor::fileForPresetName ("__test chop");
             check (f.existsAsFile() && f.getFullPathName().contains ("Castle Danger"), "preset file in the Castle Danger folder: " + f.getFullPathName());
             p.setCurrentProgram (0);
             check (p.loadUserPreset (f) && p.apvts.getRawParameterValue ("mode")->load() == 1.0f
@@ -203,7 +203,7 @@ int main (int argc, char** argv)
 
     // ---------------- Castle Danger Link: The Master (in "another plugin binary") sets controls over the socket
     {
-        ChopShopProcessor d;
+        CutthroatProcessor d;
         auto otherBinary = cdlink::Node::createIsolatedForTesting();
         juce::var lastStatus, lastApplied;
         cdlink::Endpoint master ("master", [&] (const juce::var& m)
@@ -216,7 +216,7 @@ int main (int argc, char** argv)
         for (int i = 0; i < 30 && ! master.isOnline(); ++i) pump (50);
         pump (1600);
         check (lastStatus.isObject() && lastStatus.getProperty ("params", {}).hasProperty ("ceilingDb") && lastStatus.getProperty ("extra", {}).hasProperty ("inPeakDb"),
-               "Chop Shop reports its controls and input peak over the link");
+               "Cutthroat reports its controls and input peak over the link");
         auto set = cdlink::Endpoint::makeMessage ("set");
         auto* prm = new juce::DynamicObject();
         prm->setProperty ("mode", 0.0); prm->setProperty ("shape", 1.0); prm->setProperty ("ceilingDb", -4.5);
@@ -224,12 +224,12 @@ int main (int argc, char** argv)
         master.send (set, d.getLink().getId());
         for (int i = 0; i < 40 && ! lastApplied.isObject(); ++i) pump (50);
         check (std::abs (d.apvts.getRawParameterValue ("ceilingDb")->load() + 4.5f) < 0.05f && d.apvts.getRawParameterValue ("shape")->load() > 0.5f && lastApplied.isObject(),
-               "The Master can set Chop Shop's controls (and gets a confirmation)");
+               "The Master can set Cutthroat's controls (and gets a confirmation)");
     }
 
     // ---------------- GUI
     {
-        ChopShopProcessor p;
+        CutthroatProcessor p;
         p.setPlayConfigDetails (2, 2, 48000.0, 512);
         p.setCurrentProgram (5); // Drum Bus Smash
         renderSine (p, 0.9f, 80.0f, 48000.0, 30);
@@ -247,7 +247,7 @@ int main (int argc, char** argv)
         juce::MessageManager::getInstance()->runDispatchLoopUntil (80);
         check (writePng (ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f), dir.getChildFile ("gui_master_soft.png")), "master soft snapshot");
 
-        if (auto* ce = dynamic_cast<ChopShopEditor*> (ed.get())) ce->getSaveButton().triggerClick();
+        if (auto* ce = dynamic_cast<CutthroatEditor*> (ed.get())) ce->getSaveButton().triggerClick();
         juce::MessageManager::getInstance()->runDispatchLoopUntil (120);
         check (writePng (ed->createComponentSnapshot (ed->getLocalBounds(), true, 1.0f), dir.getChildFile ("gui_save.png")), "save dialog snapshot");
     }

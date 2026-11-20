@@ -532,7 +532,7 @@ void CurveDisplay::paint (juce::Graphics& g)
 }
 
 //==============================================================================
-ChopShopEditor::ChopShopEditor (ChopShopProcessor& p)
+CutthroatEditor::CutthroatEditor (CutthroatProcessor& p)
     : AudioProcessorEditor (&p), proc (p),
       modeSel (*p.apvts.getParameter ("mode"), { "MASTER", "AGGRESSIVE" }, { "TRANSPARENT", "DRUMS & TRACKS" }),
       shapeSel (*p.apvts.getParameter ("shape"), { "HARD", "SOFT" }, { "BRICKWALL", "ROUNDED KNEE" }),
@@ -593,13 +593,13 @@ ChopShopEditor::ChopShopEditor (ChopShopProcessor& p)
     startTimerHz (30);
 }
 
-ChopShopEditor::~ChopShopEditor()
+CutthroatEditor::~CutthroatEditor()
 {
     stopTimer();
     setLookAndFeel (nullptr);
 }
 
-ChopShopEditor::Knob& ChopShopEditor::makeKnob (const juce::String& id, const juce::String& text)
+CutthroatEditor::Knob& CutthroatEditor::makeKnob (const juce::String& id, const juce::String& text)
 {
     auto k = std::make_unique<Knob>();
     k->label.setText (text, juce::dontSendNotification);
@@ -619,14 +619,14 @@ ChopShopEditor::Knob& ChopShopEditor::makeKnob (const juce::String& id, const ju
     return *knobs.back();
 }
 
-void ChopShopEditor::placeKnob (Knob& k, juce::Rectangle<int> cell)
+void CutthroatEditor::placeKnob (Knob& k, juce::Rectangle<int> cell)
 {
     k.label.setBounds (cell.removeFromTop (20));
     k.slider.setBounds (cell);
 }
 
 
-void ChopShopEditor::resized()
+void CutthroatEditor::resized()
 {
     plates.clear();
     logoArea  = { 18, 12, 430, 92 };
@@ -669,7 +669,7 @@ void ChopShopEditor::resized()
 }
 
 //==============================================================================
-void ChopShopEditor::buildBackdrop()
+void CutthroatEditor::buildBackdrop()
 {
     const float scale = 2.0f;
     const int W = getWidth(), H = getHeight();
@@ -834,7 +834,7 @@ void ChopShopEditor::buildBackdrop()
     auto pl = tex::distressedText ("PRESET", 120, 16, tex::stencil (14.0f), pal::paint, juce::Justification::centredLeft, scale, 0.2f, 7, 0.15f);
     g.drawImage (pl, juce::Rectangle<float> ((float) presetArea.getX() + 2, (float) presetArea.getY() + 2, 120.0f, 16.0f));
 
-    // the logo: CHOP in rusty red, SHOP in cream (drawn live so it can flicker)
+    // the logo: CUT in rusty red, THROAT in cream (drawn live so it can flicker)
     {
         const int lw = 330, lh = 66;
         logoImage = juce::Image (juce::Image::ARGB, (int) (lw * scale), (int) (lh * scale), true);
@@ -842,22 +842,22 @@ void ChopShopEditor::buildBackdrop()
         lg.addTransform (juce::AffineTransform::scale (scale));
         auto f = tex::stencil (62.0f).withExtraKerningFactor (0.06f);
         {
-            juce::GlyphArrangement all; all.addLineOfText (f, "CHOP SHOP", 0, 0);
+            juce::GlyphArrangement all; all.addLineOfText (f, "CUTTHROAT", 0, 0);
             const float wAll = all.getBoundingBox (0, -1, true).getWidth();
             if (wAll > (float) lw - 4.0f) f = f.withHeight (62.0f * ((float) lw - 4.0f) / wAll);
         }
         lg.setFont (f);
         lg.setColour (pal::signal);
-        lg.drawText ("CHOP", 0, 0, lw, lh, juce::Justification::centredLeft, false);
-        juce::GlyphArrangement ga; ga.addLineOfText (f, "CHOP ", 0, 0);
-        const float shopX = ga.getBoundingBox (0, -1, true).getWidth();
+        lg.drawText ("CUT", 0, 0, lw, lh, juce::Justification::centredLeft, false);
+        juce::GlyphArrangement ga; ga.addLineOfText (f, "CUT", 0, 0);
+        const float shopX = ga.getBoundingBox (0, -1, true).getWidth() + f.getHeight() * 0.06f;   // a hair of space between CUT and THROAT
         lg.setColour (pal::paint);
-        lg.drawText ("SHOP", (int) shopX, 0, lw - (int) shopX, lh, juce::Justification::centredLeft, false);
+        lg.drawText ("THROAT", (int) shopX, 0, lw - (int) shopX, lh, juce::Justification::centredLeft, false);
         tex::distress (logoImage, scale, 0.3f, 666);
     }
 }
 
-void ChopShopEditor::paint (juce::Graphics& g)
+void CutthroatEditor::paint (juce::Graphics& g)
 {
     if (backdrop.isValid()) g.drawImage (backdrop, getLocalBounds().toFloat());
     else g.fillAll (pal::ironDark);
@@ -978,7 +978,7 @@ void MeterPanel::paint (juce::Graphics& g)
     }
 }
 
-void ChopShopEditor::timerCallback()
+void CutthroatEditor::timerCallback()
 {
     if (++linkTick >= 15) { linkTick = 0; repaint (linkArea.expanded (8)); }
     auto& e = proc.getEngine();
@@ -1006,10 +1006,10 @@ void ChopShopEditor::timerCallback()
 }
 
 //==============================================================================
-void ChopShopEditor::refreshPresetBox()
+void CutthroatEditor::refreshPresetBox()
 {
     lastPresetVersion = proc.presetVersion.load();
-    userFiles = ChopShopProcessor::getUserPresets();
+    userFiles = CutthroatProcessor::getUserPresets();
     const auto current = proc.getCurrentPresetName();
 
     presetBox.clear (juce::dontSendNotification);
@@ -1029,7 +1029,7 @@ void ChopShopEditor::refreshPresetBox()
     deleteButton.setEnabled (sel >= kUserIdBase);
 }
 
-void ChopShopEditor::stepPreset (int delta)
+void CutthroatEditor::stepPreset (int delta)
 {
     std::vector<int> ids;
     for (int i = 0; i < proc.getNumPrograms(); ++i) ids.push_back (i + 1);
@@ -1040,10 +1040,10 @@ void ChopShopEditor::stepPreset (int delta)
     presetBox.setSelectedId (ids[(size_t) (((pos + delta) % n + n) % n)], juce::sendNotificationSync);
 }
 
-void ChopShopEditor::showDialog (const juce::String& title, const juce::String& message, bool withTextField, const juce::String& initialText,
+void CutthroatEditor::showDialog (const juce::String& title, const juce::String& message, bool withTextField, const juce::String& initialText,
                                  juce::StringArray buttons, std::function<void (int, const juce::String&)> onResult)
 {
-    juce::Component::SafePointer<ChopShopEditor> safe (this);
+    juce::Component::SafePointer<CutthroatEditor> safe (this);
     dialog = std::make_unique<ChopDialog> (title, message, withTextField, initialText, buttons,
         [safe, onResult] (int index, const juce::String& text)
         {
@@ -1058,20 +1058,20 @@ void ChopShopEditor::showDialog (const juce::String& title, const juce::String& 
     dialog->setBounds (getLocalBounds());
 }
 
-void ChopShopEditor::showMessage (const juce::String& title, const juce::String& text)
+void CutthroatEditor::showMessage (const juce::String& title, const juce::String& text)
 {
     showDialog (title, text, false, {}, { "OK" }, {});
 }
 
-void ChopShopEditor::promptSave()
+void CutthroatEditor::promptSave()
 {
     const bool onUser = presetBox.getSelectedId() >= kUserIdBase;
-    juce::Component::SafePointer<ChopShopEditor> safe (this);
+    juce::Component::SafePointer<CutthroatEditor> safe (this);
     auto doSave = [safe] (const juce::String& name)
     {
         if (safe == nullptr) return;
         if (! safe->proc.saveUserPreset (name))
-            safe->showMessage ("COULDN'T SAVE", "Chop Shop couldn't write the preset file to:\n" + ChopShopProcessor::getUserPresetFolder().getFullPathName());
+            safe->showMessage ("COULDN'T SAVE", "Cutthroat couldn't write the preset file to:\n" + CutthroatProcessor::getUserPresetFolder().getFullPathName());
         else safe->refreshPresetBox();
     };
     showDialog ("SAVE PRESET", "Name your preset:", true, onUser ? proc.getCurrentPresetName() : juce::String(), { "Save", "Cancel" },
@@ -1086,7 +1086,7 @@ void ChopShopEditor::promptSave()
                     safe->showMessage ("SAVE PRESET", "\"" + name + "\" is a factory preset name. Please choose another name.");
                     return;
                 }
-            if (ChopShopProcessor::fileForPresetName (name).existsAsFile())
+            if (CutthroatProcessor::fileForPresetName (name).existsAsFile())
             {
                 safe->showDialog ("REPLACE PRESET?", "A preset named \"" + name + "\" already exists. Replace it with the current settings?",
                                   false, {}, { "Replace", "Cancel" },
@@ -1097,12 +1097,12 @@ void ChopShopEditor::promptSave()
         });
 }
 
-void ChopShopEditor::confirmDelete()
+void CutthroatEditor::confirmDelete()
 {
     const int id = presetBox.getSelectedId();
     if (id < kUserIdBase || id - kUserIdBase >= userFiles.size()) return;
     const auto file = userFiles[id - kUserIdBase];
-    juce::Component::SafePointer<ChopShopEditor> safe (this);
+    juce::Component::SafePointer<CutthroatEditor> safe (this);
     showDialog ("DELETE PRESET?", "Delete \"" + file.getFileNameWithoutExtension() + "\"? This can't be undone.", false, {},
                 { "Delete", "Cancel" }, [safe, file] (int b, const juce::String&)
                 {
